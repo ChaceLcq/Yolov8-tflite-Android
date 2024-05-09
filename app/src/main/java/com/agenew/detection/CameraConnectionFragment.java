@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.tensorflow.lite.examples.detection;
+package com.agenew.detection;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -23,7 +23,6 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.Fragment;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
@@ -52,6 +51,10 @@ import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+
+import com.agenew.detection.customview.AutoFitTextureView;
+import com.agenew.detection.env.Logger;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -59,8 +62,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-import org.tensorflow.lite.examples.detection.customview.AutoFitTextureView;
-import org.tensorflow.lite.examples.detection.env.Logger;
+
 
 @SuppressLint("ValidFragment")
 public class CameraConnectionFragment extends Fragment {
@@ -550,20 +552,11 @@ public class CameraConnectionFragment extends Fragment {
       return dialog;
     }
 
-    @Override
-    public Dialog onCreateDialog(final Bundle savedInstanceState) {
-      final Activity activity = getActivity();
-      return new AlertDialog.Builder(activity)
-          .setMessage(getArguments().getString(ARG_MESSAGE))
-          .setPositiveButton(
-              android.R.string.ok,
-              new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(final DialogInterface dialogInterface, final int i) {
-                  activity.finish();
-                }
-              })
-          .create();
-    }
-  }
+		@Override
+		public Dialog onCreateDialog(final Bundle savedInstanceState) {
+			final Activity activity = getActivity();
+			return new AlertDialog.Builder(activity).setMessage(getArguments().getString(ARG_MESSAGE))
+					.setPositiveButton(android.R.string.ok, (dialogInterface, i) -> activity.finish()).create();
+		}
+	}
 }

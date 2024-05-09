@@ -5,7 +5,7 @@ android {
     compileSdkVersion 28
     buildToolsVersion '28.0.3'
     defaultConfig {
-        applicationId "org.tensorflow.lite.examples.detection"
+        applicationId "com.agenew.detection"
         minSdkVersion 21
         targetSdkVersion 28
         versionCode 1

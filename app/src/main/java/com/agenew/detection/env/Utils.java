@@ -1,4 +1,4 @@
-package org.tensorflow.lite.examples.detection.env;
+package com.agenew.detection.env;
 
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;

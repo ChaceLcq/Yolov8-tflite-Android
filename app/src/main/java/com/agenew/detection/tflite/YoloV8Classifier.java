@@ -12,8 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
-
-package org.tensorflow.lite.examples.detection.tflite;
+package com.agenew.detection.tflite;
 
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
@@ -23,27 +22,28 @@ import android.graphics.RectF;
 import android.os.Build;
 import android.util.Log;
 
-import com.mediatek.neuropilot.Interpreter;
-import com.mediatek.neuropilot.Interpreter.Options;
+import com.mediatek.neuropilot_S.Interpreter;
+import com.mediatek.neuropilot_S.Tensor;
+import com.mediatek.neuropilot_S.nnapi.NnApiDelegate;
+//import com.mediatek.neuropilot.Interpreter.Options;
 //import org.tensorflow.lite.Interpreter;
-import org.tensorflow.lite.Tensor;
-import org.tensorflow.lite.examples.detection.MainActivity;
-import org.tensorflow.lite.examples.detection.env.Logger;
-import org.tensorflow.lite.examples.detection.env.Utils;
+//import org.tensorflow.lite.Tensor;
+import com.agenew.detection.MainActivity;
+import com.agenew.detection.env.Logger;
+import com.agenew.detection.env.Utils;
+
 import org.tensorflow.lite.gpu.GpuDelegate;
-import org.tensorflow.lite.nnapi.NnApiDelegate;
+//import org.tensorflow.lite.nnapi.NnApiDelegate;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -61,7 +61,8 @@ import java.util.Vector;
  * - https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md
  * - https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/running_on_mobile_tensorflowlite.md#running-our-model-on-android
  */
-public class YoloV5Classifier implements Classifier {
+public class YoloV8Classifier implements Classifier {
+    private static final String TAG = "YoloV8Classifier";
 
     /**
      * Initializes a native TensorFlow session for classifying images.
@@ -71,17 +72,14 @@ public class YoloV5Classifier implements Classifier {
      * @param labelFilename The filepath of label file for classes.
      * @param isQuantized   Boolean representing model is quantized or not
      */
-    public static YoloV5Classifier create(
+    public static YoloV8Classifier create(
             final AssetManager assetManager,
             final String modelFilename,
             final String labelFilename,
             final boolean isQuantized,
-            final int inputSize
-            /*final int[] output_width,
-            final int[][] masks,
-            final int[] anchors*/)
+            final int inputSize)
             throws IOException {
-        final YoloV5Classifier d = new YoloV5Classifier();
+        final YoloV8Classifier d = new YoloV8Classifier();
 
         String actualFilename = labelFilename.split("file:///android_asset/")[1];
         InputStream labelsInput = assetManager.open(actualFilename);
@@ -92,37 +90,44 @@ public class YoloV5Classifier implements Classifier {
             d.labels.add(line);
         }
         br.close();
-
         try {
-            Options options = (new Options());
+            Interpreter.Options options = (new Interpreter.Options());
             options.setNumThreads(NUM_THREADS);
-//            if (isNNAPI) {
-                d.nnapiDelegate = null;
-                // Initialize interpreter with NNAPI delegate for Android Pie or above
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-//                    d.nnapiDelegate = new NnApiDelegate();
-//                    options.addDelegate(d.nnapiDelegate);
-//                   options.setNumThreads(NUM_THREADS);
-//                    options.setUseNNAPI(false);
-//                    options.setAllowFp16PrecisionForFp32(true);
-//                    options.setAllowBufferHandleOutput(true);
-                    options.setUseNNAPI(true);
-//                }
-//            }
-            if (isGPU) {
-                GpuDelegate.Options gpu_options = new GpuDelegate.Options();
-                gpu_options.setPrecisionLossAllowed(true); // It seems that the default is true
-                gpu_options.setInferencePreference(GpuDelegate.Options.INFERENCE_PREFERENCE_SUSTAINED_SPEED);
-                d.gpuDelegate = new GpuDelegate(gpu_options);
-//                options.addDelegate(d.gpuDelegate);
-            }
             d.tfliteModel = Utils.loadModelFile(assetManager, modelFilename);
-            //interpreter = new Interpreter(loadModelFile(activity, MODEL_PATH));
             d.tfLite = new Interpreter(d.tfliteModel, options);
-            Log.d("lcq", "interpreter: " + d.tfLite.toString());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+//        try {
+//            Interpreter.Options options = (new Interpreter.Options());
+//            options.setNumThreads(NUM_THREADS);
+//            if (isNNAPI) {
+//                d.nnapiDelegate = null;
+//                // Initialize interpreter with NNAPI delegate for Android Pie or above
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+//                    d.nnapiDelegate = new NnApiDelegate();
+//                    options.addDelegate(d.nnapiDelegate);
+//                    options.setNumThreads(NUM_THREADS);
+//                    options.setUseNNAPI(false);
+//                    options.setAllowFp16PrecisionForFp32(true);
+//                    options.setAllowBufferHandleOutput(true);
+//                    options.setUseNNAPI(true);
+//                }
+//            }
+//            if (isGPU) {
+//                GpuDelegate.Options gpu_options = new GpuDelegate.Options();
+//                gpu_options.setPrecisionLossAllowed(true); // It seems that the default is true
+//                gpu_options.setInferencePreference(GpuDelegate.Options.INFERENCE_PREFERENCE_SUSTAINED_SPEED);
+//                d.gpuDelegate = new GpuDelegate(gpu_options);
+////                options.addDelegate(d.gpuDelegate);
+//            }
+//            d.tfliteModel = Utils.loadModelFile(assetManager, modelFilename);
+//            interpreter = new Interpreter(loadModelFile(activity, MODEL_PATH));
+////            d.tfLite = new Interpreter(d.tfliteModel, options);
+//            Log.d("lcq", "interpreter: " + d.tfLite.toString());
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
 
         d.isModelQuantized = isQuantized;
         // Pre-allocate buffers.
@@ -144,14 +149,14 @@ public class YoloV5Classifier implements Classifier {
 //        d.OUTPUT_WIDTH = output_width;
 //        d.MASKS = masks;
 //        d.ANCHORS = anchors;
-//        if (d.isModelQuantized){
-//            Tensor inpten = d.tfLite.getInputTensor(0);
-//            d.inp_scale = inpten.quantizationParams().getScale();
-//            d.inp_zero_point = inpten.quantizationParams().getZeroPoint();
-//            Tensor oupten = d.tfLite.getOutputTensor(0);
-//            d.oup_scale = oupten.quantizationParams().getScale();
-//            d.oup_zero_point = oupten.quantizationParams().getZeroPoint();
-//        }
+        if (d.isModelQuantized){
+            Tensor inpten = d.tfLite.getInputTensor(0);
+            d.inp_scale = inpten.quantizationParams().getScale();
+            d.inp_zero_point = inpten.quantizationParams().getZeroPoint();
+            Tensor oupten = d.tfLite.getOutputTensor(0);
+            d.oup_scale = oupten.quantizationParams().getScale();
+            d.oup_zero_point = oupten.quantizationParams().getZeroPoint();
+        }
 
         int[] shape = d.tfLite.getOutputTensor(0).shape();
         d.output_box = shape[2];
@@ -169,23 +174,15 @@ public class YoloV5Classifier implements Classifier {
         return INPUT_SIZE;
     }
 
-    @Override
-    public void enableStatLogging(final boolean logStats) {
-    }
-
-    @Override
-    public String getStatString() {
-        return "";
-    }
 
     @Override
     public void close() {
         tfLite.close();
         tfLite = null;
-        if (gpuDelegate != null) {
-            gpuDelegate.close();
-            gpuDelegate = null;
-        }
+//        if (gpuDelegate != null) {
+//            gpuDelegate.close();
+//            gpuDelegate = null;
+//        }
         if (nnapiDelegate != null) {
             nnapiDelegate.close();
             nnapiDelegate = null;
@@ -194,13 +191,10 @@ public class YoloV5Classifier implements Classifier {
     }
 
     public void setNumThreads(int num_threads) {
-        if (tfLite != null) tfLite.setNumThreads(num_threads);
+        if (tfLite != null)
+            tfLite.setNumThreads(num_threads);
     }
 
-    @Override
-    public void setUseNNAPI(boolean isChecked) {
-//        if (tfLite != null) tfLite.setUseNNAPI(isChecked);
-    }
 
     private void recreateInterpreter() {
         if (tfLite != null) {
@@ -210,11 +204,11 @@ public class YoloV5Classifier implements Classifier {
     }
 
     public void useGpu() {
-        if (gpuDelegate == null) {
-            gpuDelegate = new GpuDelegate();
+//        if (gpuDelegate == null) {
+//            gpuDelegate = new GpuDelegate();
 //            tfliteOptions.addDelegate(gpuDelegate);
-            recreateInterpreter();
-        }
+//            recreateInterpreter();
+//        }
     }
 
     public void useCPU() {
@@ -223,15 +217,14 @@ public class YoloV5Classifier implements Classifier {
 
     public void useNNAPI() {
         nnapiDelegate = new NnApiDelegate();
-//        tfliteOptions.addDelegate(nnapiDelegate);
+        tfliteOptions.addDelegate(nnapiDelegate);
         recreateInterpreter();
     }
 
-    protected Interpreter interpreter;
-    @Override
-    public float getObjThresh() {
-        return MainActivity.MINIMUM_CONFIDENCE_TF_OD_API;
-    }
+	@Override
+	public float getObjThresh() {
+		return MainActivity.MINIMUM_CONFIDENCE_TF_OD_API;
+	}
 
     private static final Logger LOGGER = new Logger();
 
@@ -248,25 +241,15 @@ public class YoloV5Classifier implements Classifier {
 //    private int[] ANCHORS;
     private int output_box;
 
-    private static final float[] XYSCALE = new float[]{1.2f, 1.1f, 1.05f};
+	// Number of threads in the java app
+	private static final int NUM_THREADS = 1;
 
-    private static final int NUM_BOXES_PER_BLOCK = 3;
+	private boolean isModelQuantized;
 
-    // Number of threads in the java app
-    private static final int NUM_THREADS = 4;
-    private static boolean isNNAPI = false;
-    private static boolean isGPU = false;
-
-    private boolean isModelQuantized;
-
-    /**
-     * holds a gpu delegate
-     */
-    GpuDelegate gpuDelegate = null;
-    /**
-     * holds an nnapi delegate
-     */
-    NnApiDelegate nnapiDelegate = null;
+	/** holds a gpu delegate */
+//    GpuDelegate gpuDelegate = null;
+	/** holds an nnapi delegate */
+	NnApiDelegate nnapiDelegate = null;
 
     /**
      * The loaded TensorFlow Lite model.
@@ -294,7 +277,7 @@ public class YoloV5Classifier implements Classifier {
     private int oup_zero_point;
     private int numClass;
 
-    private YoloV5Classifier() {
+    private YoloV8Classifier() {
     }
 
 //    public float iou(float[] box1, float[] box2) {
@@ -452,24 +435,24 @@ public class YoloV5Classifier implements Classifier {
     }
 
     public List<Recognition> recognizeImage(Bitmap bitmap) {
-        //ByteBuffer byteBuffer_ = convertBitmapToByteBuffer(bitmap);
-        Bitmap byteBuffer = resizeBitmap(bitmap,640);
-        Map<Integer, Object> outputMap = new HashMap<>();
+//        ByteBuffer byteBuffer_ = convertBitmapToByteBuffer(bitmap);
+        Bitmap byteBuffer = resizeBitmap(bitmap, 640);
+//        Map<Integer, Object> outputMap = new HashMap<>();
 
 //        float[][][] outbuf = new float[1][output_box][labels.size() + 5];
-        outData.rewind();
-        outputMap.put(0, outData);
+//        outData.rewind();
+//        outputMap.put(0, outData);
         Log.d("YoloV5Classifier", "mObjThresh: " + getObjThresh());
         float[][][][] input_arr = bitmapToFloatArray(byteBuffer);
-        Object[] inputArray = {imgData};
-        Log.d("lcq", "inputArray: " + inputArray);
+//        Object[] inputArray = {imgData};
+//        Log.d("lcq", "inputArray: " + inputArray);
         float[][][] out = new float[1][numClass + 4][output_box];
         tfLite.run(input_arr, out);
-        Log.d("lcq", "outputMap: " + outputMap);
+//        Log.d("lcq", "outputMap: " + outputMap);
 
         //ByteBuffer byteBuffer = (ByteBuffer) outputMap.get(0);
         Log.d("lcq", "byteBuffer: " + byteBuffer);
-       // byteBuffer.rewind();
+        // byteBuffer.rewind();
 
         ArrayList<Recognition> detections = new ArrayList<Recognition>();
         Log.d("YoloV5Classifier", "out[0] detect start");
@@ -556,7 +539,7 @@ public class YoloV5Classifier implements Classifier {
 
 
         float[][] matrix_2d = out[0];
-        float[][] outputMatrix = new float[output_box][numClass+4];
+        float[][] outputMatrix = new float[output_box][numClass + 4];
         for (int i = 0; i < output_box; i++) {
             for (int j = 0; j < numClass + 4; j++) {
                 outputMatrix[i][j] = matrix_2d[j][i];
@@ -575,12 +558,12 @@ public class YoloV5Classifier implements Classifier {
                 }
                 //Log.d("lcq","maxClass:"+detectedClass);
             }
-            Log.d("lcq","outputmatrix:" + outputMatrix[j][0]);
+            Log.d("lcq", "outputmatrix:" + outputMatrix[j][0]);
             if (maxClass > 0.3F) {
-                final float x = outputMatrix[j][0]*640;
-                final float y = outputMatrix[j][1]*640;
-                final float w = outputMatrix[j][2]*640;
-                final float h = outputMatrix[j][3]*640;
+                final float x = outputMatrix[j][0] * 640;
+                final float y = outputMatrix[j][1] * 640;
+                final float w = outputMatrix[j][2] * 640;
+                final float h = outputMatrix[j][3] * 640;
                 final RectF rect =
                         new RectF(
                                 Math.max(0, x - w / 2),
@@ -593,13 +576,13 @@ public class YoloV5Classifier implements Classifier {
 //                                y+h/2);
                 detections.add(new Recognition("" + offset, labels.get(detectedClass),
                         maxClass, rect, detectedClass));
-                Log.d("lcq","detections:"+detections);
-                Log.d("lcq","detectClass:"+detectedClass);
+                Log.d("lcq", "detections:" + detections);
+                Log.d("lcq", "detectClass:" + detectedClass);
             }
         }
         final ArrayList<Recognition> recognitions = nms(detections);
         return recognitions;
-        }
+    }
 //        for (int j = 0; j < output_box; ++j) {
 //            final int offset = 0;
 ////            final float Score1 = out[0][5][j];
@@ -711,12 +694,13 @@ public class YoloV5Classifier implements Classifier {
 
         return true;
     }
+
     public static Bitmap resizeBitmap(Bitmap source, int maxSize) {
         int outWidth;
         int outHeight;
         int inWidth = source.getWidth();
         int inHeight = source.getHeight();
-        if(inWidth > inHeight){
+        if (inWidth > inHeight) {
             outWidth = maxSize;
             outHeight = (inHeight * maxSize) / inWidth;
         } else {
@@ -735,6 +719,7 @@ public class YoloV5Classifier implements Classifier {
 
         return outputImage;
     }
+
     public static float[][][][] bitmapToFloatArray(Bitmap bitmap) {
 
         int height = bitmap.getHeight();
@@ -747,6 +732,12 @@ public class YoloV5Classifier implements Classifier {
             for (int j = 0; j < width; ++j) {
                 // 获取像素值
                 int pixel = bitmap.getPixel(j, i);
+//                if (isModelQuantized) {
+//                    // Quantized model
+//                    result[0][i][j][0] = (((pixel >> 16) & 0xFF) / 255.0f / );
+//                    result[0][i][j][1] = (((pixel >> 8) & 0xFF) / 255.0f / inp_scale );
+//                    result[0][i][j][2] = ((pixel & 0xFF) / 255.0f / inp_scale + inp_zero_point);
+//                }
                 // 将RGB值分离并进行标准化（假设你需要将颜色值标准化到0-1之间）
                 result[0][i][j][0] = ((pixel >> 16) & 0xFF) / 255.0f;
                 result[0][i][j][1] = ((pixel >> 8) & 0xFF) / 255.0f;

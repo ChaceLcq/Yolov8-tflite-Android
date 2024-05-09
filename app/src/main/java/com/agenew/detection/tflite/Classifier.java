@@ -13,8 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-package org.tensorflow.lite.examples.detection.tflite;
-
+package com.agenew.detection.tflite;
 import android.graphics.Bitmap;
 import android.graphics.RectF;
 
@@ -26,22 +25,16 @@ import java.util.List;
 public interface Classifier {
     List<Recognition> recognizeImage(Bitmap bitmap);
 
-    void enableStatLogging(final boolean debug);
-
-    String getStatString();
-
     void close();
 
     void setNumThreads(int num_threads);
 
-    void setUseNNAPI(boolean isChecked);
-
-    abstract float getObjThresh();
+    float getObjThresh();
 
     /**
      * An immutable result returned by a Classifier describing what was recognized.
      */
-    public class Recognition {
+    class Recognition {
         /**
          * A unique identifier for what has been recognized. Specific to the class, not the instance of
          * the object.
@@ -64,14 +57,6 @@ public interface Classifier {
         private RectF location;
 
         private int detectedClass;
-
-        public Recognition(
-                final String id, final String title, final Float confidence, final RectF location) {
-            this.id = id;
-            this.title = title;
-            this.confidence = confidence;
-            this.location = location;
-        }
 
         public Recognition(final String id, final String title, final Float confidence, final RectF location, int detectedClass) {
             this.id = id;
@@ -103,10 +88,6 @@ public interface Classifier {
 
         public int getDetectedClass() {
             return detectedClass;
-        }
-
-        public void setDetectedClass(int detectedClass) {
-            this.detectedClass = detectedClass;
         }
 
         @Override
