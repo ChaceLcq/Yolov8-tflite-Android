@@ -16,10 +16,10 @@ public class DetectorFactory {
         int[][] masks = new int[][]{{0}};
         int[] anchors = new int[]{0};
 
-        if (modelFilename.equals("yolov8n_full_integer_quant_init.tflite")) {
+        if (modelFilename.equals("yolov8n_float16.tflite")) {
             labelFilename = "file:///android_asset/class.txt";
             //isQuantized = modelFilename.endsWith("yolov8n_full_integer_quant_init.tflite");
-            isQuantized = true;
+            isQuantized = false;
             inputSize = 640;
             output_width = new int[]{80, 40, 144};
             masks = new int[][]{{0, 1, 2}, {3, 4, 5}, {6, 7, 8}};

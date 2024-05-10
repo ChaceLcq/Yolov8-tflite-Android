@@ -170,7 +170,7 @@ public class CameraConnectionFragment extends Fragment {
         @Override
         public void onSurfaceTextureAvailable(
             final SurfaceTexture texture, final int width, final int height) {
-          openCamera(width, height);
+              openCamera(width, height);
         }
 
         @Override

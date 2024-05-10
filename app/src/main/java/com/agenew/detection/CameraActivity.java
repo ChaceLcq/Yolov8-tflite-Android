@@ -37,6 +37,8 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Trace;
 import androidx.annotation.NonNull;
+
+import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
 import android.view.View;
@@ -248,6 +250,7 @@ public abstract class CameraActivity extends Activity
 			@Override
 			public void run() {
 				camera.addCallbackBuffer(bytes);
+				Log.d("lcq","bytes = " + bytes);
 				isProcessingFrame = false;
 			}
 		};
@@ -499,8 +502,9 @@ public abstract class CameraActivity extends Activity
 		if (v.getId() == R.id.plus) {
 			String threads = threadsTextView.getText().toString().trim();
 			int numThreads = Integer.parseInt(threads);
-			if (numThreads >= 9)
+			if (numThreads >= 9) {
 				return;
+			}
 			numThreads++;
 			threadsTextView.setText(String.valueOf(numThreads));
 			setNumThreads(numThreads);

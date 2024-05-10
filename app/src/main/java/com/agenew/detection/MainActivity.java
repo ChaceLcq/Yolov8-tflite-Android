@@ -122,7 +122,7 @@ public class MainActivity extends CameraActivity implements OnImageAvailableList
 		LOGGER.i("Initializing at size %dx%d", previewWidth, previewHeight);
 		rgbFrameBitmap = Bitmap.createBitmap(previewWidth, previewHeight, Config.ARGB_8888);
 		croppedBitmap = Bitmap.createBitmap(cropSize, cropSize, Config.ARGB_8888);
-
+		Log.d("lcq","croppedBitmap" + croppedBitmap);
 		frameToCropTransform = ImageUtils.getTransformationMatrix(previewWidth, previewHeight, cropSize, cropSize,
 				sensorOrientation, MAINTAIN_ASPECT);
 
@@ -225,18 +225,19 @@ public class MainActivity extends CameraActivity implements OnImageAvailableList
 
 		final Canvas canvas = new Canvas(croppedBitmap);
 		canvas.drawBitmap(rgbFrameBitmap, frameToCropTransform, null);
+		Log.d("croppedBitmap","croppedBitmap"+croppedBitmap);
 		// For examining the actual TF input.
 		if (SAVE_PREVIEW_BITMAP) {
 			ImageUtils.saveBitmap(croppedBitmap);
+			Log.d("lcq","croppedBitmap1" + croppedBitmap);
 		}
 
 		runInBackground(() -> {
             LOGGER.i("Running detection on image " + currTimestamp);
             final long startTime = SystemClock.uptimeMillis();
-            final List<Classifier.Recognition> results = detector.recognizeImage(croppedBitmap);
-            lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime;
-
-            Log.e("CHECK", "run: " + results.size());
+			final List<Classifier.Recognition> results = detector.recognizeImage(croppedBitmap);
+			lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime;
+			Log.e("CHECK", "run: " + results.size());
 
             cropCopyBitmap = Bitmap.createBitmap(croppedBitmap);
             final Canvas canvas1 = new Canvas(cropCopyBitmap);
